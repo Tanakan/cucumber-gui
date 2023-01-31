@@ -15,11 +15,17 @@ public class FeatureController {
     @Autowired
     private ExecutionService executionService;
     private final List<Feature> features;
-    private final String workDirectory;
+    private final String cucumberProjectRootPath;
 
-    public FeatureController() {
-        this.workDirectory = System.getProperty("WORKSPACE");
-        this.features = FeaturesBuilder.getFeatures(workDirectory);
+    private final String[] args;
+
+    public FeatureController() throws IllegalArgumentException {
+        this.cucumberProjectRootPath = System.getProperty("workspace");
+        if(this.cucumberProjectRootPath == null){
+            throw new IllegalArgumentException("Please Set Cucumber Pdoject Path. -Dworkspace=<filepath>");
+        }
+        this.args = System.getProperty("executeArgs", "").split(" ");
+        this.features = FeaturesBuilder.getFeatures(cucumberProjectRootPath);
     }
 
     @GetMapping
@@ -29,9 +35,9 @@ public class FeatureController {
     }
 
     @PostMapping
-    public String execute(String featureIndex, String scenarioIndex, Model model){
+    public String execute(String featureIndex, String scenarioIndex){
         Scenario scenario = this.features.get(Integer.valueOf(featureIndex)).getScenario().get(Integer.valueOf(scenarioIndex));
-        int exitValue = executionService.execute(workDirectory, scenario);
+        int exitValue = executionService.execute(cucumberProjectRootPath, scenario, args);
         if(exitValue == 0){
             scenario.setSuccess();
             this.features.get(Integer.valueOf(featureIndex)).getScenario().set(Integer.valueOf(scenarioIndex), scenario);

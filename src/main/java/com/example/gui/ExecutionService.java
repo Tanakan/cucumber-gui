@@ -1,18 +1,22 @@
 package com.example.gui;
 
-import io.cucumber.core.gherkin.Pickle;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.maven.cli.MavenCli;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 @Service
 public class ExecutionService {
+    private static Logger logger = LoggerFactory.getLogger(ExecutionService.class);
+
     public int execute(String workDirectory, Scenario scenario, String ...args){
-        ProcessBuilder processBuilder = new ProcessBuilder(ArrayUtils.addAll(new String[]{"mvn", "test", "-Dcucumber.filter.name=" + scenario.getName()}, args));
+        String[] commands = ArrayUtils.addAll(new String[]{"mvn", "test", "-Dcucumber.filter.name=" + scenario.getName()}, args);
+        logger.info("commands: {}", Arrays.toString(commands));
+        ProcessBuilder processBuilder = new ProcessBuilder(commands);
         processBuilder.directory(new File(workDirectory));
         try {
             Process process= processBuilder.start();
