@@ -1,6 +1,7 @@
 package com.example.gui;
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,14 +18,17 @@ public class FeatureController {
     private final List<Feature> features;
     private final String cucumberProjectRootPath;
 
-    private final String[] args;
+    private String[] args;
 
     public FeatureController() throws IllegalArgumentException {
         this.cucumberProjectRootPath = System.getProperty("workspace");
         if(this.cucumberProjectRootPath == null){
             throw new IllegalArgumentException("Please Set Cucumber Pdoject Path. -Dworkspace=<filepath>");
         }
-        this.args = System.getProperty("executeArgs", "").split(" ");
+        String executeArgs = System.getProperty("executeArgs", null);
+        if(!StringUtils.isEmpty(executeArgs)){
+            this.args = executeArgs.split(" ");
+        }
         this.features = FeaturesBuilder.getFeatures(cucumberProjectRootPath);
     }
 
@@ -39,10 +43,11 @@ public class FeatureController {
         Scenario scenario = this.features.get(Integer.valueOf(featureIndex)).getScenario().get(Integer.valueOf(scenarioIndex));
         int exitValue = executionService.execute(cucumberProjectRootPath, scenario, args);
         if(exitValue == 0){
-            scenario.setSuccess();
+            scenario.setSuccess(true);
             this.features.get(Integer.valueOf(featureIndex)).getScenario().set(Integer.valueOf(scenarioIndex), scenario);
+        }else{
+            scenario.setSuccess(false);
         }
         return "redirect:";
     }
-
 }

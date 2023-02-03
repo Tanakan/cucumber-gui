@@ -15,8 +15,10 @@ public class Scenario {
     private boolean isSuccess = false;
     private Date date;
 
-    public void setSuccess(){
-        this.isSuccess = true;
-        this.date = new Date();
+    public void setSuccess(boolean success){
+        this.isSuccess = success;
+        if(isSuccess) {
+            this.date = new Date();
+        }
     }
 }
