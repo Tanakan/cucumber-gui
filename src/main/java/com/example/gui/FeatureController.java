@@ -1,8 +1,8 @@
 package com.example.gui;
 
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,16 +18,14 @@ public class FeatureController {
     private final List<Feature> features;
     private final String cucumberProjectRootPath;
 
-    private String[] args;
+    private final String[] cmdArgs;
 
-    public FeatureController() throws IllegalArgumentException {
+
+    public FeatureController(ApplicationArguments applicationArguments) throws IllegalArgumentException {
+        this.cmdArgs = applicationArguments.getSourceArgs();
         this.cucumberProjectRootPath = System.getProperty("workspace");
         if(this.cucumberProjectRootPath == null){
             throw new IllegalArgumentException("Please Set Cucumber Pdoject Path. -Dworkspace=<filepath>");
-        }
-        String executeArgs = System.getProperty("executeArgs", null);
-        if(!StringUtils.isEmpty(executeArgs)){
-            this.args = executeArgs.split(" ");
         }
         this.features = FeaturesBuilder.getFeatures(cucumberProjectRootPath);
     }
@@ -41,7 +39,7 @@ public class FeatureController {
     @PostMapping
     public String execute(String featureIndex, String scenarioIndex){
         Scenario scenario = this.features.get(Integer.valueOf(featureIndex)).getScenario().get(Integer.valueOf(scenarioIndex));
-        int exitValue = executionService.execute(cucumberProjectRootPath, scenario, args);
+        int exitValue = executionService.execute(cucumberProjectRootPath, scenario, cmdArgs);
         if(exitValue == 0){
             scenario.setSuccess(true);
             this.features.get(Integer.valueOf(featureIndex)).getScenario().set(Integer.valueOf(scenarioIndex), scenario);

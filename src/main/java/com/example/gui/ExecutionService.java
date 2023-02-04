@@ -16,6 +16,7 @@ public class ExecutionService {
 
     public int execute(String workDirectory, Scenario scenario, String args[]){
         String[] commands = ArrayUtils.addAll(new String[]{"mvn", "test" ,"-Dcucumber.filter.name=" + scenario.getName()}, args);
+        logger.info("args: {}", StringUtils.join(args));
         logger.info("workDirectory: {}", workDirectory);
         logger.info("Command: {}", StringUtils.join(commands, " "));
         ProcessBuilder processBuilder = new ProcessBuilder(commands);
